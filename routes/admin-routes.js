@@ -17,6 +17,9 @@ router.post("/login", adminController.userLogin);
 
 router.post("/addBlock", adminController.addBlock);
 
+router.get("/getBlocks", adminController.geListOfBlocks);
+
+
 router.post("/addFlat", adminController.addFlat);
 
 router.post("/addFamilyMember", adminController.addFamilyMemberDetails);

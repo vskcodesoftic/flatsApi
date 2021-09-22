@@ -335,7 +335,30 @@ const getIncomeByMonthAndYear = async (req, res, next) => {
   });
 };
 
+/* get blocks */
+const geListOfBlocks = async(req, res, next) => {
 
+
+ let existingBlocks
+ try{
+    existingBlocks = await Block.find({});
+ }
+ catch(err){
+   const error = new HttpError("something went wrong");
+   return next(error)
+ } 
+
+
+ if(!existingBlocks){
+   const error = new HttpError("blocks not found");
+   return next(error)
+ }
+
+ res.json({
+   Blocks: existingBlocks.map((block) => block.toObject({ getters: true }))
+ });
+
+}
 
 exports.addAdmin = addAdmin;
 exports.userLogin = userLogin;
@@ -346,3 +369,4 @@ exports.addFamilyMemberDetails = addFamilyMemberDetails;
 exports.getDetailsbyFlatNumber = getDetailsbyFlatNumber;
 exports.getDetailsOfFamilyMembers = getDetailsOfFamilyMembers;
 exports.getFlatsbyBlockNumber = getFlatsbyBlockNumber;
+exports.geListOfBlocks = geListOfBlocks;
