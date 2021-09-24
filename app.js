@@ -28,17 +28,21 @@ require("./db/db");
 app.use(bodyParser.urlencoded({ extended: true, limit: "100mb" }));
 app.use(bodyParser.json({ limit: "100mb" }));
 
-app.use(
-  cors({
-    origin: [
-      "https://flatsapi.herokuapp.com",
-      "http://localhost:3000",
-      "http://localhost:3001",
-      "http://localhost:3002",
-    ],
-    credentials: true,
-  })
-);
+// app.use(
+//   cors({
+//     origin: [
+//       "https://flatsapi.herokuapp.com",
+//       "http://localhost:3000",
+//       "http://localhost:3001",
+//       "http://localhost:3002",
+//     ],
+//     credentials: true,
+//   })
+// );
+
+
+app.use(cors());
+
 
 //static serving
 app.use(express.static("public"));
