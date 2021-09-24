@@ -31,6 +31,7 @@ app.use(bodyParser.json({ limit: "100mb" }));
 app.use(
   cors({
     origin: [
+      "https://flatsapi.herokuapp.com",
       "http://localhost:3000",
       "http://localhost:3001",
       "http://localhost:3002",
