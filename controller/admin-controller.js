@@ -69,7 +69,7 @@ const addAdmin = async (req, res, next) => {
 
 
 const userLogin = async (req, res, next) => {
-  console.log("login", req.body);
+  // console.log("login", req.body);
   const { email, password } = req.body;
   let token = "";
 
@@ -290,20 +290,21 @@ const getDetailsOfFamilyMembers = async (req, res, next) => {
 
 
 const getFlatsbyBlockNumber = async (req, res ,next ) => {
-const { BlockNumber } = req.body;
+const  BlockNumber  = req.params.bid;
+    // const productId = req.params.pid;
+console.log("block num : ", BlockNumber)
 
- flatDetails = await Block.findOne({ BlockNumber: BlockNumber }).populate(
-   "flats"
- );
+ flatDetails = await Flat.find({ BlockNumber: BlockNumber });
 
  if (!flatDetails) {
    const error = new HttpError("block datab doest exist");
    return next(error);
  }
 
-res.json({
-  flats: flatDetails,
-});
+  res.json({
+    flatDetails: flatDetails })
+  
+
 }
 
 
@@ -360,6 +361,33 @@ const geListOfBlocks = async(req, res, next) => {
 
 }
 
+
+/* get list of flats */
+const geListOfFlats = async(req, res, next) => {
+
+
+ let existingFlats
+ try{
+    existingFlats = await Flat.find({});
+ }
+ catch(err){
+   const error = new HttpError("something went wrong");
+   return next(error)
+ } 
+
+
+ if (!existingFlats) {
+   const error = new HttpError("Flats not found");
+   return next(error);
+ }
+
+ res.json({
+   Flats: existingFlats.map((flat) => flat.toObject({ getters: true })),
+ });
+
+}
+
+
 exports.addAdmin = addAdmin;
 exports.userLogin = userLogin;
 exports.addBlock = addBlock;
@@ -370,3 +398,4 @@ exports.getDetailsbyFlatNumber = getDetailsbyFlatNumber;
 exports.getDetailsOfFamilyMembers = getDetailsOfFamilyMembers;
 exports.getFlatsbyBlockNumber = getFlatsbyBlockNumber;
 exports.geListOfBlocks = geListOfBlocks;
+exports.geListOfFlats = geListOfFlats;

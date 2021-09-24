@@ -29,6 +29,8 @@ router.post("/getDetialsByFlatNumber", adminController.getDetailsbyFlatNumber);
 router.post("/getDetialsOfFamilyMembersbyFlatNumber", adminController.getDetailsOfFamilyMembers);
 
 
-router.post("/getDetailsByFlatNumber", adminController.getFlatsbyBlockNumber);
+router.get("/getDetailsByBlockNumber/:bid", adminController.getFlatsbyBlockNumber);
+
+router.get("/getListofFlats", adminController.geListOfFlats);
 
 module.exports = router;
