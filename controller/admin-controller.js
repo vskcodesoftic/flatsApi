@@ -301,8 +301,15 @@ console.log("block num : ", BlockNumber)
    return next(error);
  }
 
-  res.json({
-    flatDetails: flatDetails })
+ if (flatDetails.length == 0){
+     const error = new HttpError(`Add flats data in block no ${BlockNumber}`,400);
+    
+
+     return next(error);
+ }
+   res.json({
+     flatDetails: flatDetails,
+   });
   
 
 }
@@ -354,18 +361,19 @@ let hashedPassword;
 try{
  hashedPassword = await passwordHash.generate(newpassword);
  let foundadmin;
- foundadmin = await admin.findOne({ email : email  })
+ foundadmin = await User.findOne({ email : email  })
   
  var updatedRecord = {
      password: hashedPassword
  }
 
- admin.findByIdAndUpdate(foundadmin, { $set: updatedRecord },{new:true}, (err, docs) => {
+ User.findByIdAndUpdate(foundadmin, { $set: updatedRecord },{new:true}, (err, docs) => {
     if (!err) res.json({mesage : "password updated sucessfully"})
     else console.log('Error while updating a record : ' + JSON.stringify(err, undefined, 2))
  })
 } 
 catch(err){
+  console.log(err)
     const error = new HttpError("cold not updated hash password of admin",500);
     return next(error)
 }
