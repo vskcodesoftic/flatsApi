@@ -75,11 +75,17 @@ const userLogin = async (req, res, next) => {
 
   const user = await User.findOne({ email: email.toLowerCase() });
 
-  if (!user) return res.status(200).json({ error: "User not found" });
+  if (!user) {
+    const error = new HttpError("user not found",404)
+    return next(error)
+  }
 
   const verifyPassword = passwordHash.verify(password, user.password);
   if (!verifyPassword)
-    return res.status(200).json({ error: "Incorrect Password" });
+  {
+    const error = new HttpError("Incorrect Password")
+    return next(error)
+  }
 
   const payload = {
     userId: user._id,
