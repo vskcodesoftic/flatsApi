@@ -308,33 +308,70 @@ console.log("block num : ", BlockNumber)
 }
 
 
-/* get income by month & year */
 
-const getIncomeByMonthAndYear = async (req, res, next) => {
-  const errors = validationResult(req);
-  const monthId = req.params.monthId;
-  const yearId = req.params.yearId;
+//update admin password 
+const  updateAdminPassword = async(req, res, next) => {
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+        console.log(errors);
+        const error =  new HttpError("invalid input are passed,please pass valid data",422)
+        return next(error)
+    }
+    const { email, oldpassword , newpassword } = req.body;
 
-  if (!errors.isEmpty()) {
-    return next(
-      new HttpError("Invalid inputs passed, please check your data.", 422)
-    );
-  }
-  let income;
-  try {
-    income = await Income.find({ month: `${monthId}`, year: `${yearId}` });
-  } catch (err) {
-    const error = new HttpError(
-      "can not fetch Income of spefied details complete request",
-      500
-    );
-    return next(error);
-  }
+    let admin
+    try{
+         admin = await User.findOne({ email : email  })
+    }
+    catch(err){
+        const error = await new HttpError("something went wrong,update password in failed",500)
+        return next(error)
+    }
 
-  res.json({
-    IncomeDetails: income.map((income) => income.toObject({ getters: true })),
-  });
-};
+    if(!admin){
+        const error = new HttpError("admin not found could not update password",401)
+        return next(error)
+    }
+  
+   let isValidPassword = false; 
+   try{
+      isValidPassword = passwordHash.verify(oldpassword, admin.password);
+   }
+   catch(err){
+    const error = await new HttpError("invalid password try again",500)
+    return next(error)
+}
+
+
+if(!isValidPassword){
+    const error = new HttpError("invalid old password could not update newpassword",401)
+    return next(error)
+}
+
+let hashedPassword;
+ 
+
+try{
+ hashedPassword = await passwordHash.generate(newpassword);
+ let foundadmin;
+ foundadmin = await admin.findOne({ email : email  })
+  
+ var updatedRecord = {
+     password: hashedPassword
+ }
+
+ admin.findByIdAndUpdate(foundadmin, { $set: updatedRecord },{new:true}, (err, docs) => {
+    if (!err) res.json({mesage : "password updated sucessfully"})
+    else console.log('Error while updating a record : ' + JSON.stringify(err, undefined, 2))
+ })
+} 
+catch(err){
+    const error = new HttpError("cold not updated hash password of admin",500);
+    return next(error)
+}
+
+
+}
 
 /* get blocks */
 const geListOfBlocks = async(req, res, next) => {
@@ -534,3 +571,5 @@ exports.geListOfContacts = geListOfContacts;
 
 exports.deleteBlockById = deleteBlockById;
 exports.deleteFlatById = deleteFlatById;
+
+exports.updateAdminPassword = updateAdminPassword;

@@ -44,5 +44,6 @@ router.delete("/flat/:fid", adminController.deleteFlatById);
 
 router.delete("/block/:bid", adminController.deleteBlockById);
 
+router.post("/updatePassword", adminController.updateAdminPassword);
 
 module.exports = router;
