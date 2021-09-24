@@ -33,4 +33,16 @@ router.get("/getDetailsByBlockNumber/:bid", adminController.getFlatsbyBlockNumbe
 
 router.get("/getListofFlats", adminController.geListOfFlats);
 
+router.get("/geListOfContacts",adminController.geListOfContacts);
+
+router.post("/addListOfContacts", adminController.addEmergencyContact);
+
+router.delete('/contacts/:pid',adminController.deleteEmergencyContact);
+
+router.delete("/flat/:fid", adminController.deleteFlatById);
+
+
+router.delete("/block/:bid", adminController.deleteBlockById);
+
+
 module.exports = router;

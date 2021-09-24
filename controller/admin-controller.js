@@ -11,7 +11,7 @@ const User = require("../models/user-schema");
 const Flat = require("../models/flats-schema");
 const FamilyMember = require("../models/family-schema");
 const Block = require("../models/block-schema");
-
+const Emergency = require("../models/emergency-contacts")
 
 const { v1: uuid } = require("uuid");
 
@@ -291,7 +291,7 @@ const getDetailsOfFamilyMembers = async (req, res, next) => {
 
 const getFlatsbyBlockNumber = async (req, res ,next ) => {
 const  BlockNumber  = req.params.bid;
-    // const productId = req.params.pid;
+    // const contacId = req.params.pid;
 console.log("block num : ", BlockNumber)
 
  flatDetails = await Flat.find({ BlockNumber: BlockNumber });
@@ -387,6 +387,133 @@ const geListOfFlats = async(req, res, next) => {
 
 }
 
+//Add Emergency contact number
+const addEmergencyContact = async (req, res, next) => {
+  const { name, email, ContactNumber, designation, BlockNumber, FlatNumber } = req.body;
+
+  const existingBlock = await Block.findOne({ BlockNumber: BlockNumber });
+
+    const existingEmail = await Emergency.findOne({ email: email });
+
+
+  if (!existingBlock) {
+    const error = new HttpError("Block Number doesnt Exists ");
+    return next(error);
+  }
+
+
+  if (existingEmail) {
+    const error = new HttpError("email id already Exists ");
+    return next(error);
+  }
+
+
+  const addedContact = new Emergency({
+    name,
+    email,
+    ContactNumber,
+    designation,
+    BlockNumber,
+    FlatNumber,
+  });
+
+  try {
+    await addedContact.save();
+  } catch (err) {
+    console.log(err);
+    const error = new HttpError("Adding Emergency contact Failed , please try again.", 500);
+    return next(error);
+  }
+  res.json({ Contact: addedContact });
+};
+
+/* get list of emergencyContacts */
+const geListOfContacts = async(req, res, next) => {
+
+
+ let ListOfContacts;
+ try{
+    ListOfContacts = await Emergency.find({});
+ }
+ catch(err){
+   const error = new HttpError("something went wrong");
+   return next(error)
+ } 
+
+
+ if(ListOfContacts.length == 0){
+ const error = new HttpError("there are no contacts ,please add contacts");
+ return next(error);
+ }
+
+ res.json({
+   Contacts: ListOfContacts.map((contact) =>
+     contact.toObject({ getters: true })
+   ),
+ });
+
+}
+
+
+//delete deleteEmergencyContact by id
+const deleteEmergencyContact = async (req, res, next) => {
+    const contacId = req.params.pid;
+    Emergency.findByIdAndRemove(contacId)
+    .then((result) => {
+      res.json({
+        success: true,
+        msg: `Contact has been deleted.`,
+        result: {
+          _id: result._id,
+          title: result.title,
+        }
+      });
+    })
+    .catch((err) => {
+      res.status(404).json({ success: false, msg: 'Nothing to delete with provided id.' });
+    });
+
+  };
+
+  //delete Block by id
+const deleteBlockById = async (req, res, next) => {
+    const blockId = req.params.bid;
+    Block.findByIdAndRemove(blockId)
+    .then((result) => {
+      res.json({
+        success: true,
+        msg: `Block has been deleted.`,
+        result: {
+          _id: result._id,
+          title: result.title,
+        }
+      });
+    })
+    .catch((err) => {
+      res.status(404).json({ success: false, msg: 'Nothing to delete with provided id.' });
+    });
+
+  };
+
+  //delete flat by id
+const deleteFlatById = async (req, res, next) => {
+    const flatId = req.params.fid;
+    Flat.findByIdAndRemove(flatId)
+    .then((result) => {
+      res.json({
+        success: true,
+        msg: `Flat has been deleted.`,
+        result: {
+          _id: result._id,
+          title: result.title,
+        }
+      });
+    })
+    .catch((err) => {
+      res.status(404).json({ success: false, msg: 'Nothing to delete with provided id.' });
+    });
+
+  };
 
 exports.addAdmin = addAdmin;
 exports.userLogin = userLogin;
@@ -399,3 +526,11 @@ exports.getDetailsOfFamilyMembers = getDetailsOfFamilyMembers;
 exports.getFlatsbyBlockNumber = getFlatsbyBlockNumber;
 exports.geListOfBlocks = geListOfBlocks;
 exports.geListOfFlats = geListOfFlats;
+exports.deleteEmergencyContact = deleteEmergencyContact;
+
+
+exports.addEmergencyContact = addEmergencyContact ;
+exports.geListOfContacts = geListOfContacts;
+
+exports.deleteBlockById = deleteBlockById;
+exports.deleteFlatById = deleteFlatById;
