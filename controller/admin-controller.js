@@ -16,6 +16,7 @@ const OfficeBearer = require("../models/office-bearer-schema")
 const Notice = require("../models/notice-schema")
 
 const { v1: uuid } = require("uuid");
+const { findByIdAndUpdate } = require("../models/user-schema");
 
 
 
@@ -155,6 +156,7 @@ const addFlat = async (req, res, next) => {
     NumberOfFamilyMembers,
     famliyMembersList,
     ownerOccupation,
+    showFamilyMembers,
   } = req.body;
 
    const existingFlat = await Flat.findOne({ flatno: flatno });
@@ -180,6 +182,7 @@ const addFlat = async (req, res, next) => {
     flatno,
     famliyMembersList,
     BlockNumber,
+    showFamilyMembers
   });
 
   try {
@@ -302,23 +305,47 @@ const  BlockNumber  = req.params.bid;
     // const contacId = req.params.pid;
 console.log("block num : ", BlockNumber)
 
- flatDetails = await Flat.find({ BlockNumber: BlockNumber });
+   
 
- if (!flatDetails) {
-   const error = new HttpError("block datab doest exist");
+ let hiddenFamilyMembersData;
+ try {
+   hiddenFamilyMembersData = await Flat.find(
+     { showFamilyMembers: false , BlockNumber :BlockNumber },
+     { famliyMembersList: 0 }
+   );
+ } catch (err) {
+   const error = new HttpError("something went wrong");
    return next(error);
  }
 
- if (flatDetails.length == 0){
-     const error = new HttpError(`Add flats data in block no ${BlockNumber}`,400);
-    
+ const hiddenFamilyMemData = hiddenFamilyMembersData.map((flat) =>
+   flat.toObject({ getters: true })
+ );
 
-     return next(error);
+ let visbleFamilyMembersData;
+ try {
+   visbleFamilyMembersData = await Flat.find({ showFamilyMembers: true });
+ } catch (err) {
+   const error = new HttpError("something went wrong");
+   return next(error);
  }
-   res.json({
-     flatDetails: flatDetails,
-   });
-  
+
+ const showFamilyData = visbleFamilyMembersData.map((flat) =>
+   flat.toObject({ getters: true })
+ );
+
+ const newData = hiddenFamilyMemData.concat(showFamilyData)
+ console.log("type of", newData);
+
+ if (!newData) {
+   const error = new HttpError("no data found", 404);
+   return next(error);
+ }
+
+ res.json({
+   Flats: newData,
+ });
+
 
 }
 
@@ -727,6 +754,54 @@ const geListOfNotices = async (req, res, next) => {
 
 }
 
+
+const updateFamilyMembersStatus = async (req, res, next) => {
+    const userId = req.params.id;
+
+  const { showFamilyMembers } = req.body;
+  
+  
+
+  let existingUser 
+
+  try {
+    existingUser = await Flat.findById(userId)
+  }
+  catch(err){
+    const error = new HttpError("something ent wrong", 505)
+    return next(error)
+  }
+  if(!existingUser){
+    const error = new HttpError("user not found",404)
+    return next(error)
+  }
+
+
+
+let user;
+  try {
+   user = await Flat.updateOne(
+     { _id: userId },
+     {
+       showFamilyMembers
+     }
+   );
+}
+catch(err){
+  const error = new HttpError("something went wrong",500)
+  return next(error)
+}
+if(!user){
+    const error = new HttpError("updating record failed",501)
+  return next(error)
+}
+
+res.json({message : "record update sucessfully"})
+}
+
+
+
+
 exports.addAdmin = addAdmin;
 exports.userLogin = userLogin;
 exports.addBlock = addBlock;
@@ -757,3 +832,5 @@ exports.addNotice = addNotice;
 
 exports.geListOfOfficeBearer = geListOfOfficeBearer;
 exports.geListOfNotices = geListOfNotices;
+
+exports.updateFamilyMembersStatus = updateFamilyMembersStatus ;

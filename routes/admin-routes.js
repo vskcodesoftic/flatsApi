@@ -59,4 +59,6 @@ router.get("/getListOfofficeBearer", adminController.geListOfOfficeBearer);
 
 router.get("/getListOfNotices", adminController.geListOfNotices);
 
+router.patch("/updateStatus/:id",adminController.updateFamilyMembersStatus);
+
 module.exports = router;

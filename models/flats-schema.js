@@ -38,6 +38,10 @@ const FlatsSchema = mongoose.Schema(
         required: true,
       },
     ],
+    showFamilyMembers : {
+       type : Boolean,
+      default : true
+    },
 
     famliyMembers: [{ type: mongoose.Types.ObjectId, ref: "FamilyMember" }],
   },
