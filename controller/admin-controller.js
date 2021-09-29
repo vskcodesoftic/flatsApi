@@ -310,7 +310,12 @@ console.log("block num : ", BlockNumber)
  let hiddenFamilyMembersData;
  try {
    hiddenFamilyMembersData = await Flat.find(
-     { showFamilyMembers: false , BlockNumber :BlockNumber },
+     {
+       $and: [
+         { showFamilyMembers: { $eq: false } },
+         { BlockNumber: BlockNumber  },
+       ],
+     },
      { famliyMembersList: 0 }
    );
  } catch (err) {
@@ -324,7 +329,9 @@ console.log("block num : ", BlockNumber)
 
  let visbleFamilyMembersData;
  try {
-   visbleFamilyMembersData = await Flat.find({ showFamilyMembers: true });
+   visbleFamilyMembersData = await Flat.find({
+     $and: [{ showFamilyMembers: { $eq: true } }, { BlockNumber: BlockNumber }],
+   });
  } catch (err) {
    const error = new HttpError("something went wrong");
    return next(error);
