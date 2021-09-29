@@ -12,6 +12,8 @@ const Flat = require("../models/flats-schema");
 const FamilyMember = require("../models/family-schema");
 const Block = require("../models/block-schema");
 const Emergency = require("../models/emergency-contacts")
+const OfficeBearer = require("../models/office-bearer-schema")
+const Notice = require("../models/notice-schema")
 
 const { v1: uuid } = require("uuid");
 
@@ -566,6 +568,165 @@ const deleteFlatById = async (req, res, next) => {
 
   };
 
+
+  //delete bearer  by id
+const deleteOfficeBearerById = async (req, res, next) => {
+    const bearerId = req.params.fid;
+    OfficeBearer.findByIdAndRemove(bearerId)
+    .then((result) => {
+      res.json({
+        success: true,
+        msg: `Office Bearer has been deleted.`,
+        result: {
+          _id: result._id,
+          title: result.title,
+        }
+      });
+    })
+    .catch((err) => {
+      res.status(404).json({ success: false, msg: 'Nothing to delete with provided id.' });
+    });
+
+  };
+
+
+  //delete Notice  by id
+const deleteNoticerById = async (req, res, next) => {
+    const noticeId = req.params.fid;
+    Notice.findByIdAndRemove(noticeId)
+    .then((result) => {
+      res.json({
+        success: true,
+        msg: `Notice has been deleted.`,
+        result: {
+          _id: result._id,
+          title: result.title,
+        }
+      });
+    })
+    .catch((err) => {
+      res.status(404).json({ success: false, msg: 'Nothing to delete with provided id.' });
+    });
+
+  };
+
+  /* Add addOfficeBearer */
+
+const addOfficeBearer = async (req, res, next) => {
+
+     const { name, email, ContactNumber, designation } = req.body;
+
+   const existingEmail = await Flat.findOne({ email: email });
+
+   if(existingEmail){
+       const error = new HttpError("email already registred ");
+       return next(error)
+   }
+
+  
+
+  const addedOfficeBearer = new OfficeBearer({
+    name,
+    email,
+    ContactNumber,
+    designation,
+  });
+
+   try {
+     await addedOfficeBearer.save();
+   } catch (err) {
+     console.log(err);
+     const error = new HttpError(
+       "Adding OfficeBearer Failed , please try again.",
+       500
+     );
+     return next(error);
+   }
+   res.json({ OfficeBearer: addedOfficeBearer });
+};
+
+  /* Add notice */
+
+const addNotice = async (req, res, next) => {
+
+     const { title, subject, message } = req.body;
+  
+
+  const addedNotice = new Notice({
+    title,
+    subject,
+    message,
+  });
+
+   try {
+     await addedNotice.save();
+   } catch (err) {
+     console.log(err);
+     const error = new HttpError(
+       "Adding notice Failed , please try again.",
+       500
+     );
+     return next(error);
+   }
+   res.json({ Notice: addedNotice });
+};
+
+
+/* get list of officeBearer */
+const geListOfOfficeBearer = async(req, res, next) => {
+
+
+ let existingOfficeBearer
+ try{
+    existingOfficeBearer = await OfficeBearer.find({});
+ }
+ catch(err){
+   const error = new HttpError("something went wrong");
+   return next(error)
+ } 
+
+
+ if (!existingOfficeBearer) {
+   const error = new HttpError("contacts not found");
+   return next(error);
+ }
+
+ res.json({
+   OfficeBearer: existingOfficeBearer.map((contact) =>
+     contact.toObject({ getters: true })
+   ),
+ });
+
+}
+
+
+/* get list of Notices */
+const geListOfNotices = async (req, res, next) => {
+
+
+ let exitingNotices
+ try{
+    exitingNotices = await Notice.find({});
+ }
+ catch(err){
+   const error = new HttpError("something went wrong");
+   return next(error)
+ } 
+
+
+ if (!exitingNotices) {
+   const error = new HttpError("Notices not found");
+   return next(error);
+ }
+
+ res.json({
+   Notices: exitingNotices.map((notice) =>
+     notice.toObject({ getters: true })
+   ),
+ });
+
+}
+
 exports.addAdmin = addAdmin;
 exports.userLogin = userLogin;
 exports.addBlock = addBlock;
@@ -585,5 +746,14 @@ exports.geListOfContacts = geListOfContacts;
 
 exports.deleteBlockById = deleteBlockById;
 exports.deleteFlatById = deleteFlatById;
+exports.deleteNoticerById = deleteNoticerById;
+exports.deleteOfficeBearerById = deleteOfficeBearerById;
+
 
 exports.updateAdminPassword = updateAdminPassword;
+
+exports.addOfficeBearer = addOfficeBearer;
+exports.addNotice = addNotice;
+
+exports.geListOfOfficeBearer = geListOfOfficeBearer;
+exports.geListOfNotices = geListOfNotices;

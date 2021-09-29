@@ -41,9 +41,22 @@ router.delete('/contacts/:pid',adminController.deleteEmergencyContact);
 
 router.delete("/flat/:fid", adminController.deleteFlatById);
 
+router.delete("/officeBearer/:fid", adminController.deleteOfficeBearerById);
+
+router.delete("/notice/:fid", adminController.deleteNoticerById);
+
 
 router.delete("/block/:bid", adminController.deleteBlockById);
 
 router.post("/updatePassword", adminController.updateAdminPassword);
+
+router.post("/addOfficeBearer", adminController.addOfficeBearer);
+
+router.post("/addNotice", adminController.addNotice);
+
+
+router.get("/getListOfofficeBearer", adminController.geListOfOfficeBearer);
+
+router.get("/getListOfNotices", adminController.geListOfNotices);
 
 module.exports = router;
